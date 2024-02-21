@@ -23,15 +23,18 @@ router.post('/upload', upload.single('image'),async(req, res) => {
     const file = req.file;
     const extension = path.extname(file.originalname);
     console.log(extension);
+    
     const key = uuidv4() +extension;
+    console.log(typeof(key));
     console.log(key);
     const params = {
         Bucket: process.env.BUCKET,
         Key: key,
         Body: file.buffer,
+        
     };
     try {
-        const image = new Image({ Key: key });
+        const image = new Image({ key: key });
         await image.save();
         console.log('Image URL saved to database');
         // res.status(200).send('Image uploaded successfully');
@@ -55,8 +58,9 @@ router.post('/upload', upload.single('image'),async(req, res) => {
             Expires: 3600,
         });
         res.json({ imageUrl: signedUrl });
-    });
-   // res.json("done");
+    }
+   );
+    // res.json("done");
 });
 
 

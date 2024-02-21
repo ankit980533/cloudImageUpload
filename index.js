@@ -12,7 +12,7 @@ mongoose.connect("mongodb+srv://user:ankitraj@cluster0.ky8l28e.mongodb.net/")
   .then(() => console.log('Connected to MongoDB'))
   .catch(err => console.error('Error connecting to MongoDB:', err));
 
-// Routes
+  
 app.use('/api/images', require('./routes/images'));
 
 app.listen(port, () => {
