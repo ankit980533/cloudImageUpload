@@ -1,4 +1,4 @@
-// routes/images.js
+
 const express = require('express');
 const router = express.Router();
 const aws = require('aws-sdk');
@@ -19,8 +19,7 @@ const s3 = new aws.S3({
     signatureVersion: 'v4',
 });
 
-// Upload image
-router.post('/upload', upload.single('image'), (req, res) => {
+router.post('/upload', upload.single('image'),async(req, res) => {
     const file = req.file;
     const extension = path.extname(file.originalname);
     console.log(extension);
@@ -31,15 +30,25 @@ router.post('/upload', upload.single('image'), (req, res) => {
         Key: key,
         Body: file.buffer,
     };
-
-    s3.upload(params, (err, data) => {
+    try {
+        const image = new Image({ Key: key });
+        await image.save();
+        console.log('Image URL saved to database');
+        // res.status(200).send('Image uploaded successfully');
+      } catch (error) {
+        console.error('Error saving image URL to database:', error);
+        res.status(500).send('Error saving image URL to database');
+      }
+     s3.upload(params,  (err, data) => {
         if (err) {
             console.error(err);
             return res.status(500).json({ error: 'Failed to upload image' });
         }
-        const image = new Image({ key });
-        //     await image.save();
-        // Generate a signed URL for the uploaded object
+        // const image = new Image({ Key:key });
+        //           await image.save()
+                //    .then(console.log("image added to mongodb"));
+               
+       
         const signedUrl = s3.getSignedUrl('getObject', {
             Bucket: process.env.BUCKET,
             Key: key,
@@ -50,11 +59,11 @@ router.post('/upload', upload.single('image'), (req, res) => {
    // res.json("done");
 });
 
-// Get image
+
 router.get('/:imageName', (req, res) => {
     const imageName = req.params.imageName;
 
-    // Generate a signed URL for the requested object
+   
     const signedUrl = s3.getSignedUrl('getObject', {
         Bucket: process.env.BUCKET,
         Key: imageName,
